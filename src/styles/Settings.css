@@ -1,0 +1,109 @@
+.settings {
+  padding: 1.5rem;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.settings h2 {
+  margin-bottom: 1.5rem;
+}
+
+.connection-info {
+  margin-bottom: 1.5rem;
+}
+
+.info-row {
+  display: flex;
+  justify-content: space-between;
+  padding: 0.75rem 0;
+  border-bottom: 1px solid var(--border);
+}
+
+.info-row:last-child {
+  border-bottom: none;
+}
+
+.status-connected {
+  color: var(--success);
+  font-weight: 600;
+}
+
+.status-disconnected {
+  color: var(--text-secondary);
+}
+
+.device-id {
+  font-family: monospace;
+  font-size: 0.875rem;
+}
+
+.setting-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem 0;
+  border-bottom: 1px solid var(--border);
+}
+
+.setting-item:last-child {
+  border-bottom: none;
+}
+
+.setting-info {
+  flex: 1;
+  margin-right: 1rem;
+}
+
+.setting-info label {
+  display: block;
+  font-weight: 600;
+  margin-bottom: 0.25rem;
+}
+
+.setting-info p {
+  font-size: 0.875rem;
+  color: var(--text-secondary);
+}
+
+.rider-name-input {
+  width: 100%;
+  padding: 0.75rem;
+  font-size: 1rem;
+  border-radius: 6px;
+  border: 1px solid var(--border);
+  background: var(--surface-light);
+  color: var(--text-primary);
+  margin-bottom: 0.5rem;
+}
+
+.input-hint {
+  font-size: 0.875rem;
+  color: var(--text-secondary);
+}
+
+.about-info {
+  margin-bottom: 1.5rem;
+  line-height: 1.8;
+}
+
+.about-info p {
+  display: flex;
+  justify-content: space-between;
+  padding: 0.5rem 0;
+  border-bottom: 1px solid var(--border);
+}
+
+.about-info p:last-child {
+  border-bottom: none;
+}
+
+.about-features h4 {
+  margin-bottom: 0.75rem;
+  font-size: 1.1rem;
+}
+
+.about-features ul {
+  margin-left: 1.5rem;
+  line-height: 1.8;
+  color: var(--text-secondary);
+}

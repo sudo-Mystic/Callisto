@@ -50,11 +50,13 @@ class BleService {
 
       // Timeout scan after 10 seconds
       setTimeout(async () => {
-          if (store.isScanning) {
+          // Check live state, not captured state
+          const currentStore = useVehicleStore.getState();
+          if (currentStore.isScanning) {
               await BleClient.stopLEScan();
-              store.setScanning(false);
-              if (!store.isConnected) {
-                  store.setConnectionStatus('Scan timeout');
+              currentStore.setScanning(false);
+              if (!currentStore.isConnected) {
+                  currentStore.setConnectionStatus('Scan timeout');
               }
           }
       }, 10000);
@@ -93,8 +95,13 @@ class BleService {
 
   async disconnect(): Promise<void> {
     if (this.deviceId) {
-      await BleClient.disconnect(this.deviceId);
-      this.onDisconnect(this.deviceId);
+      try {
+          await BleClient.disconnect(this.deviceId);
+      } catch (error) {
+          console.error("Error disconnecting:", error);
+      } finally {
+          this.onDisconnect(this.deviceId);
+      }
     }
   }
 

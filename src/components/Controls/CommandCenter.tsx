@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { bleService } from '../../services/BleService';
 import { Sliders, Sun, Search, Power } from 'lucide-react';
 import clsx from 'clsx';
@@ -11,6 +11,20 @@ export const CommandCenter: React.FC = () => {
 
     // Safety: Disable controls if speed > 0
     const isMoving = telemetry.speed > 0;
+
+    // Refs for safe async operations
+    const isMounted = useRef(false);
+    const tslTimeout = useRef<NodeJS.Timeout | null>(null);
+
+    useEffect(() => {
+        isMounted.current = true;
+        return () => {
+            isMounted.current = false;
+            if (tslTimeout.current) {
+                clearTimeout(tslTimeout.current);
+            }
+        };
+    }, []);
 
     const handleIlluminationChange = async (val: number) => {
         if (isMoving) return;
@@ -34,6 +48,7 @@ export const CommandCenter: React.FC = () => {
     const runTslTest = async () => {
         if (isMoving) return;
         if (isTestRunning) return;
+
         setTestRunning(true);
 
         // Toggle TSL on
@@ -44,7 +59,9 @@ export const CommandCenter: React.FC = () => {
         packetOn[19] = 0xFF;
         await bleService.write(packetOn);
 
-        setTimeout(async () => {
+        tslTimeout.current = setTimeout(async () => {
+            if (!isMounted.current) return;
+
             // Toggle TSL off
             const packetOff = new Uint8Array(20);
             packetOff[0] = 0x5A;
@@ -52,7 +69,10 @@ export const CommandCenter: React.FC = () => {
             packetOff[6] = 0x00; // TSL Off
             packetOff[19] = 0xFF;
             await bleService.write(packetOff);
-            setTestRunning(false);
+
+            if (isMounted.current) {
+                setTestRunning(false);
+            }
         }, 3000);
     };
 

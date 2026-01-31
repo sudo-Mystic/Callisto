@@ -3,9 +3,13 @@ import mapboxgl from 'mapbox-gl';
 import 'mapbox-gl/dist/mapbox-gl.css';
 import { navigationBridge } from '../../services/NavigationBridge';
 
-// Note: In a real app, this should be in an env variable
-// Using a placeholder public token for development/demo purposes
-mapboxgl.accessToken = 'pk.eyJ1Ijoiam9obmRvZSIsImEiOiJjbHpq...'; // Replace with valid token
+// Read from env
+const mapboxToken = import.meta.env.VITE_MAPBOX_TOKEN;
+if (!mapboxToken) {
+    console.error("VITE_MAPBOX_TOKEN is missing! Map will not load.");
+} else {
+    mapboxgl.accessToken = mapboxToken;
+}
 
 export const MapComponent: React.FC = () => {
     const mapContainer = useRef<HTMLDivElement>(null);
@@ -13,6 +17,7 @@ export const MapComponent: React.FC = () => {
     const [zoom] = useState(14);
 
     useEffect(() => {
+        if (!mapboxToken) return;
         if (map.current || !mapContainer.current) return;
 
         map.current = new mapboxgl.Map({
@@ -40,9 +45,23 @@ export const MapComponent: React.FC = () => {
             toggle = !toggle;
         }, 10000);
 
-        return () => clearInterval(interval);
+        return () => {
+            clearInterval(interval);
+            if (map.current) {
+                map.current.remove();
+                map.current = null;
+            }
+        };
 
     }, [zoom]);
+
+    if (!mapboxToken) {
+        return (
+            <div className="w-full h-full flex items-center justify-center bg-slate-900 border border-slate-800 rounded-xl">
+                <div className="text-red-400 font-bold">Mapbox Token Missing</div>
+            </div>
+        );
+    }
 
     return (
         <div className="relative w-full h-full rounded-xl overflow-hidden shadow-2xl border border-slate-800">

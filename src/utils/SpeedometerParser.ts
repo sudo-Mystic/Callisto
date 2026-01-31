@@ -62,23 +62,35 @@ export const initialTelemetry: TelemetryData = {
 export class SpeedometerParser {
 
     static parse(data: DataView, currentData: TelemetryData): TelemetryData {
+        // Safety Check: Minimum length for header (Start + ID) is 2 bytes
+        // But practical minimum for any useful packet is 20 bytes as per protocol
+        if (data.byteLength < 20) {
+            console.warn(`Packet too short: ${data.byteLength} bytes`);
+            return currentData;
+        }
+
         const startByte = data.getUint8(0);
         if (startByte !== START_BYTE_5A) return currentData;
 
         const packetId = data.getUint8(1);
         const newData = { ...currentData };
 
-        switch (packetId) {
-            case PACKET_ID_SPEEDOMETER_1:
-                return SpeedometerParser.parseFrame1(data, newData);
-            case PACKET_ID_SPEEDOMETER_2:
-                return SpeedometerParser.parseFrame2(data, newData);
-            case PACKET_ID_SPEEDOMETER_3:
-                return SpeedometerParser.parseFrame3(data, newData);
-            case PACKET_ID_SPEEDOMETER_4:
-                return SpeedometerParser.parseFrame4(data, newData);
-            default:
-                return currentData;
+        try {
+            switch (packetId) {
+                case PACKET_ID_SPEEDOMETER_1:
+                    return SpeedometerParser.parseFrame1(data, newData);
+                case PACKET_ID_SPEEDOMETER_2:
+                    return SpeedometerParser.parseFrame2(data, newData);
+                case PACKET_ID_SPEEDOMETER_3:
+                    return SpeedometerParser.parseFrame3(data, newData);
+                case PACKET_ID_SPEEDOMETER_4:
+                    return SpeedometerParser.parseFrame4(data, newData);
+                default:
+                    return currentData;
+            }
+        } catch (error) {
+            console.error("Error parsing packet", error);
+            return currentData;
         }
     }
 

@@ -29,7 +29,12 @@ export const DiagnosticCenter: React.FC = () => {
     const [activeTab, setActiveTab] = useState<'sensors' | 'dtc'>('sensors');
 
     // Simulate DTCs if MIL is on (Since we don't have a full DTC map yet)
-    const dtcList = telemetry.malfunctionIndicator ? ['P0101 - MAF Sensor Range', 'P0300 - Random Misfire'] : [];
+    const dtcList = telemetry.malfunctionIndicator
+        ? [
+            { code: 'P0101', description: 'MAF Sensor Range', simulated: true },
+            { code: 'P0300', description: 'Random Misfire', simulated: true }
+          ]
+        : [];
 
     return (
         <div className="p-4 pb-24 h-full overflow-y-auto bg-slate-950">
@@ -126,10 +131,15 @@ export const DiagnosticCenter: React.FC = () => {
                                 <p className="text-slate-400 text-center text-sm mb-6">The ECU has reported the following diagnostic trouble codes.</p>
 
                                 <div className="w-full space-y-2">
-                                    {dtcList.map((code, idx) => (
-                                        <div key={idx} className="bg-red-950/50 border border-red-900/50 p-3 rounded-lg flex items-center gap-3">
-                                            <AlertTriangle size={16} className="text-red-500" />
-                                            <span className="font-mono text-red-200">{code}</span>
+                                    {dtcList.map((dtc, idx) => (
+                                        <div key={idx} className="bg-red-950/50 border border-red-900/50 p-3 rounded-lg flex items-center justify-between gap-3">
+                                            <div className="flex items-center gap-3">
+                                                <AlertTriangle size={16} className="text-red-500" />
+                                                <span className="font-mono text-red-200">{dtc.code} - {dtc.description}</span>
+                                            </div>
+                                            {dtc.simulated && (
+                                                <span className="text-[10px] bg-slate-700 text-slate-300 px-2 py-0.5 rounded uppercase font-bold">Simulated</span>
+                                            )}
                                         </div>
                                     ))}
                                 </div>
@@ -145,7 +155,11 @@ export const DiagnosticCenter: React.FC = () => {
                          )}
                     </div>
 
-                    <button className="w-full py-4 bg-slate-800 text-slate-300 font-bold rounded-xl hover:bg-slate-700 transition-colors">
+                    <button
+                        disabled={true}
+                        title="Requires restart — not yet implemented"
+                        className="w-full py-4 bg-slate-800 text-slate-300 font-bold rounded-xl disabled:opacity-50 cursor-not-allowed transition-colors"
+                    >
                         Clear DTCs (Requires Restart)
                     </button>
                 </div>

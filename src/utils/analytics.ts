@@ -36,7 +36,13 @@ export const predictRange = (telemetry: TelemetryData): number => {
 
 export const getMaintenanceStatus = (odometer: number): { status: string, color: string, nextService: number } => {
     const serviceInterval = 3000; // 3000 km
-    const nextService = Math.ceil(odometer / serviceInterval) * serviceInterval;
+
+    // Fix: Ensure nextService is at least one interval if odometer is low/zero
+    let nextService = Math.ceil(odometer / serviceInterval) * serviceInterval;
+    if (nextService === 0 || nextService === odometer) {
+        nextService += serviceInterval;
+    }
+
     const dueIn = nextService - odometer;
 
     if (dueIn < 100) return { status: 'SERVICE DUE', color: 'text-red-500', nextService };

@@ -14,18 +14,61 @@ class BleService {
   private isConnected = false;
   private keepAliveInterval: NodeJS.Timeout | null = null;
   private onDataCallback: ((data: TelemetryData) => void) | null = null;
+  private initialized = false;
+  private initializationError: string | null = null;
+  private initializationPromise: Promise<void> | null = null;
 
   async initialize(): Promise<void> {
+    // Return existing promise if already initializing
+    if (this.initializationPromise) {
+      return this.initializationPromise;
+    }
+
+    this.initializationPromise = this.doInitialize();
+    return this.initializationPromise;
+  }
+
+  private async doInitialize(): Promise<void> {
     try {
+      // Check if Web Bluetooth API is available
+      if (typeof navigator === 'undefined' || !navigator.bluetooth) {
+        throw new Error('Web Bluetooth is not supported in this browser. Please use Chrome, Edge, or Opera on a desktop or Android device.');
+      }
+
       await BleClient.initialize();
+      this.initialized = true;
+      this.initializationError = null;
       console.log('BLE initialized');
     } catch (error) {
+      this.initialized = false;
+      this.initializationError = error instanceof Error ? error.message : 'Failed to initialize Bluetooth';
       console.error('Failed to initialize BLE:', error);
       throw error;
     }
   }
 
+  isInitialized(): boolean {
+    return this.initialized;
+  }
+
+  getInitializationError(): string | null {
+    return this.initializationError;
+  }
+
+  async ensureInitialized(): Promise<void> {
+    if (this.initialized) {
+      return;
+    }
+    if (this.initializationError) {
+      throw new Error(this.initializationError);
+    }
+    await this.initialize();
+  }
+
   async scan(onDeviceFound: (device: BleDevice) => void): Promise<void> {
+    // Ensure BLE is initialized before scanning
+    await this.ensureInitialized();
+
     try {
       await BleClient.requestLEScan(
         {

@@ -7,11 +7,13 @@ import '../styles/ConnectionScreen.css';
 const ConnectionScreen: React.FC = () => {
   const [isScanning, setIsScanning] = useState(false);
   const [devices, setDevices] = useState<BleDevice[]>([]);
+  const [scanError, setScanError] = useState<string | null>(null);
   const { setConnection } = useAppStore();
 
   const handleScan = async () => {
     setIsScanning(true);
     setDevices([]);
+    setScanError(null);
     setConnection({ isScanning: true, error: null });
 
     try {
@@ -32,9 +34,11 @@ const ConnectionScreen: React.FC = () => {
     } catch (error) {
       console.error('Scan failed:', error);
       setIsScanning(false);
+      const errorMessage = error instanceof Error ? error.message : 'Failed to scan for devices';
+      setScanError(errorMessage);
       setConnection({
         isScanning: false,
-        error: 'Failed to scan for devices',
+        error: errorMessage,
       });
     }
   };
@@ -72,6 +76,15 @@ const ConnectionScreen: React.FC = () => {
             <button className="btn btn-primary scan-btn" onClick={handleScan}>
               Scan for Vehicle
             </button>
+          )}
+
+          {scanError && (
+            <div className="error-message">
+              <p>{scanError}</p>
+              <button className="btn btn-secondary" onClick={() => setScanError(null)}>
+                Dismiss
+              </button>
+            </div>
           )}
 
           {isScanning && (

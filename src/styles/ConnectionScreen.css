@@ -118,3 +118,18 @@
   line-height: 1.8;
   color: var(--text-secondary);
 }
+
+.error-message {
+  background: rgba(239, 68, 68, 0.15);
+  border: 1px solid rgba(239, 68, 68, 0.4);
+  border-radius: 12px;
+  padding: 1.5rem;
+  margin-bottom: 1rem;
+  text-align: center;
+}
+
+.error-message p {
+  color: #ef4444;
+  margin-bottom: 1rem;
+  line-height: 1.5;
+}
